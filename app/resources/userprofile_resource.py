@@ -1,7 +1,7 @@
 import pymysql
 from framework.resources.base_resource import BaseResource
 from app.models.user_profile import UserProfile
-from tkinter import messagebox
+# from tkinter import messagebox
 
 class UserProfileResource(BaseResource):
 
