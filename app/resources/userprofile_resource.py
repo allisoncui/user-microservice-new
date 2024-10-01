@@ -1,7 +1,10 @@
 import pymysql
+import logging
 from framework.resources.base_resource import BaseResource
 from app.models.user_profile import UserProfile
-# from tkinter import messagebox
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 class UserProfileResource(BaseResource):
 
@@ -33,14 +36,30 @@ class UserProfileResource(BaseResource):
                 user = cursor.fetchone()
 
                 if user:
-                    messagebox.showinfo("Info", f"User '{username}' already exists.")
+                    logging.info(f"User '{username}' already exists.")
                     return user[0]
 
                 # Insert a new user profile
                 cursor.execute(query_insert, (username,))
                 connection.commit()
-                messagebox.showinfo("Success", f"User '{username}' registered successfully.")
+                logging.info(f"User '{username}' registered successfully.")
                 return cursor.lastrowid
+        finally:
+            connection.close()
+
+    def get_by_key(self, username: str) -> UserProfile:
+        """Retrieve user profile by the username key."""
+        query = f"SELECT * FROM {self.table} WHERE username = %s"
+
+        connection = self.get_db_connection()
+        try:
+            with connection.cursor(pymysql.cursors.DictCursor) as cursor:
+                cursor.execute(query, (username,))
+                result = cursor.fetchone()
+                if result:
+                    return UserProfile(**result)
+                else:
+                    return None
         finally:
             connection.close()
 
