@@ -1,7 +1,5 @@
-from __future__ import annotations
-from typing import Optional
 from pydantic import BaseModel
-
+from typing import Optional
 
 class UserProfile(BaseModel):
     id: Optional[int] = None

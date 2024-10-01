@@ -1,38 +1,46 @@
 import pymysql
 from framework.resources.base_resource import BaseResource
 from app.models.user_profile import UserProfile
+from tkinter import messagebox
 
 class UserProfileResource(BaseResource):
 
     def __init__(self, config):
         super().__init__(config)
-        # MySQL database connection details (adjust based on your AWS RDS instance)
         self.db_config = {
-            'host': 'user-micros-db.cdrum5qefv6d.us-east-1.rds.amazonaws.com',  # Replace with your AWS RDS endpoint
-            'user': 'admin',  # Replace with your MySQL username
-            'password': 'dbuserdbuser',  # Replace with your MySQL password
-            'database': 'user_db',  # Replace with your database name
-            'port': 3306  # Default MySQL port
+            'host': 'availability-database.cb821k94flru.us-east-1.rds.amazonaws.com',
+            'user': 'root',
+            'password': 'dbuserdbuser',
+            'database': 'availability',
+            'port': 3306
         }
-        self.table = "users"  # The MySQL table to query
+        self.table = "Profile"
 
     def get_db_connection(self):
         """Establish connection to the MySQL database."""
         return pymysql.connect(**self.db_config)
 
-    def get_by_key(self, username: str) -> UserProfile:
-        """Retrieve user profile by the username key."""
-        query = f"SELECT * FROM {self.table} WHERE username = %s"
+    def register_user(self, username: str) -> int:
+        """Register user if not already registered."""
+        query_check = f"SELECT user_id FROM {self.table} WHERE username = %s"
+        query_insert = f"INSERT INTO {self.table} (username) VALUES (%s)"
 
         connection = self.get_db_connection()
         try:
-            with connection.cursor(pymysql.cursors.DictCursor) as cursor:
-                cursor.execute(query, (username,))
-                result = cursor.fetchone()
-                if result:
-                    return UserProfile(**result)
-                else:
-                    return None
+            with connection.cursor() as cursor:
+                # Check if the user exists
+                cursor.execute(query_check, (username,))
+                user = cursor.fetchone()
+
+                if user:
+                    messagebox.showinfo("Info", f"User '{username}' already exists.")
+                    return user[0]
+
+                # Insert a new user profile
+                cursor.execute(query_insert, (username,))
+                connection.commit()
+                messagebox.showinfo("Success", f"User '{username}' registered successfully.")
+                return cursor.lastrowid
         finally:
             connection.close()
 
@@ -46,7 +54,6 @@ class UserProfileResource(BaseResource):
                 cursor.execute(query, (username,))
                 result = cursor.fetchone()
                 if result and result.get("viewed_restaurants"):
-                    # Assuming `viewed_restaurants` is a comma-separated string
                     return result["viewed_restaurants"].split(",")
                 else:
                     return []
