@@ -1,7 +1,11 @@
+import os
 import pymysql
 import logging
 from framework.resources.base_resource import BaseResource
 from app.models.user_profile import UserProfile
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -11,11 +15,11 @@ class UserProfileResource(BaseResource):
     def __init__(self, config):
         super().__init__(config)
         self.db_config = {
-            'host': 'availability-database.cb821k94flru.us-east-1.rds.amazonaws.com',
-            'user': 'root',
-            'password': 'dbuserdbuser',
-            'database': 'availability',
-            'port': 3306
+            'host': os.getenv('DB_HOST'),
+            'user': os.getenv('DB_USER'),
+            'password': os.getenv('DB_PASSWORD'),
+            'database': os.getenv('DB_NAME'),
+            'port': int(os.getenv('DB_PORT', 3306))
         }
         self.table = "Profile"
 
