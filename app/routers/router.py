@@ -19,7 +19,12 @@ async def register_user(username: str):
 
     user_id = user_profile_resource.register_user(username)
     if user_id:
-        return {"message": f"User '{username}' registered with ID {user_id}"}
+        #return {"message": f"User '{username}' registered with ID {user_id}"}
+        return Response(
+            content=f"User '{username}' registered with ID {user_id}",
+            status_code=status.HTTP_201_CREATED,
+            headers={"Location": f"/user/{username}"}
+        )
     else:
         raise HTTPException(status_code=500, detail="Registration failed")
 
