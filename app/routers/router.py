@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Response, status
 from app.resources.userprofile_resource import UserProfileResource
 
 router = APIRouter()
@@ -17,9 +17,15 @@ async def get_user_profile(username: str):
 async def register_user(username: str):
     user_profile_resource = UserProfileResource(config={})
 
+    existing_user = user_profile_resource.get_by_key(username)
+    if existing_user:
+        return Response(
+            content=f"User '{username}' already exists",
+            status_code=status.HTTP_200_OK
+        )
+
     user_id = user_profile_resource.register_user(username)
     if user_id:
-        #return {"message": f"User '{username}' registered with ID {user_id}"}
         return Response(
             content=f"User '{username}' registered with ID {user_id}",
             status_code=status.HTTP_201_CREATED,
