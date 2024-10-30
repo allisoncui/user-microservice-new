@@ -35,6 +35,7 @@ async def register_user(username: str):
     else:
         raise HTTPException(status_code=500, detail="Registration failed")
 
+"""
 @router.get("/user/{username}/viewed_restaurants", tags=["user"])
 async def get_viewed_restaurants(username: str):
     user_profile_resource = UserProfileResource(config={})
@@ -44,3 +45,4 @@ async def get_viewed_restaurants(username: str):
         return {"username": username, "viewed_restaurants": viewed_restaurants}
     else:
         raise HTTPException(status_code=404, detail="No viewed restaurants found for this user")
+"""
