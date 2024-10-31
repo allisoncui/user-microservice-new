@@ -1,17 +1,8 @@
 from app.resources.userprofile_resource import UserProfileResource
-from fastapi import APIRouter, HTTPException, Response, status
+from fastapi import APIRouter, HTTPException, Response, status, Request
+from app.utils import utils
 
 router = APIRouter()
-
-@router.get("/user/{username}", tags=["user"])
-async def get_user_profile(username: str):
-    user_profile_resource = UserProfileResource(config={})
-
-    result = user_profile_resource.get_by_key(username)
-    if result:
-        return result
-    else:
-        raise HTTPException(status_code=404, detail="User not found")
 
 @router.post("/user/{username}/register", tags=["user"])
 async def register_user(username: str):
@@ -35,14 +26,18 @@ async def register_user(username: str):
     else:
         raise HTTPException(status_code=500, detail="Registration failed")
 
-"""
-@router.get("/user/{username}/viewed_restaurants", tags=["user"])
-async def get_viewed_restaurants(username: str):
+@router.get("/user/{username}", tags=["user"], name="get_user_profile")
+async def get_user_profile(username: str, request: Request):
     user_profile_resource = UserProfileResource(config={})
+    user = user_profile_resource.get_by_key(username)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
 
-    viewed_restaurants = user_profile_resource.get_viewed_restaurants(username)
-    if viewed_restaurants:
-        return {"username": username, "viewed_restaurants": viewed_restaurants}
-    else:
-        raise HTTPException(status_code=404, detail="No viewed restaurants found for this user")
-"""
+    # Generate HATEOAS links
+    links = utils.generate_user_links(request, username)
+
+    return {
+        "user": user,
+        "username": username,
+        "_links": links
+    }

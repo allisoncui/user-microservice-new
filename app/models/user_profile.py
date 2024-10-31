@@ -1,5 +1,9 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
+
+class Link(BaseModel):
+    href: str
+    method: str
 
 class UserProfile(BaseModel):
     id: Optional[int] = None
@@ -14,3 +18,7 @@ class UserProfile(BaseModel):
                 "viewed_restaurants": "69593,65452,64593"
             }
         }
+
+class ViewedRestaurantsResponse(BaseModel):
+    viewed_restaurants: List[str]
+    links: dict[str, Link]
