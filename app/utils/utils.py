@@ -14,8 +14,6 @@ def generate_user_links(request: Request, username: str) -> Dict[str, Link]:
     return {
         "self": Link(href=self_url, method="GET"),
         "add": Link(href=self_url, method="POST"),
-        "update": Link(href=self_url, method="PUT"),
-        "delete": Link(href=self_url, method="DELETE"),
         "viewed_restaurants": Link(
             href=f"{base_url}/user/{username}/viewed_restaurants", method="GET"
         ),
