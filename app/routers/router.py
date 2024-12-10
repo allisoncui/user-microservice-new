@@ -67,6 +67,7 @@ async def login_via_google(request: Request):
     redirect_uri = request.url_for('auth_google_callback')
     return await oauth.google.authorize_redirect(request, redirect_uri)
 
+
 @auth_router.get("/auth/google/callback", tags=["auth"])
 async def auth_google_callback(request: Request):
     """
@@ -79,6 +80,7 @@ async def auth_google_callback(request: Request):
         raise HTTPException(status_code=400, detail="OAuth authentication failed")
 
     user_info = token.get('userinfo')
+    print(user_info)
     if not user_info or 'email' not in user_info:
         raise HTTPException(status_code=400, detail="Failed to retrieve user info from Google.")
 
@@ -97,14 +99,14 @@ async def auth_google_callback(request: Request):
 
     # Notify about user login
     user_profile_resource.notify_user_login(username)
-   
+
     # Create JWT token
     token_data = {"sub": username, "user_id": user_id}
     jwt_token = create_access_token(token_data)
 
-    # Redirect to the frontend with the JWT token
+    # Redirect to the frontend with the JWT token and username
     frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
-    redirect_url = f"{frontend_url}/auth/callback?token={jwt_token}"
+    redirect_url = f"{frontend_url}/auth/callback?token={jwt_token}&username={username}"
     return RedirectResponse(url=redirect_url)
 
 @auth_router.get("/user/{username}", tags=["auth"], name="get_user_profile")
