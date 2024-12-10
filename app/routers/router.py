@@ -95,6 +95,9 @@ async def auth_google_callback(request: Request):
         if not user_id:
             raise HTTPException(status_code=500, detail="Registration failed")
 
+    # Notify about user login
+    user_profile_resource.notify_user_login(username)
+   
     # Create JWT token
     token_data = {"sub": username, "user_id": user_id}
     jwt_token = create_access_token(token_data)
@@ -114,6 +117,8 @@ async def get_user_profile(username: str, request: Request):
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
+    user_profile_resource.notify_user_login(username)
+    
     # Generate HATEOAS links
     links = utils.generate_user_links(request, username)
 
