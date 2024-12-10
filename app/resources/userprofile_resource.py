@@ -1,3 +1,4 @@
+import boto3
 import os
 import pymysql
 import logging
@@ -22,6 +23,29 @@ class UserProfileResource(BaseResource):
             'port': int(os.getenv('DB_PORT', 3306))
         }
         self.table = "Profile"
+        self.sns_client = boto3.client('sns', region_name=os.getenv('AWS_REGION', 'us-east-1'))
+        self.sns_topic_arn = os.getenv('SNS_TOPIC_ARN')  # Load topic ARN from environment
+    
+    def notify_user_login(self, username: str):
+        """Send a notification to SNS on user login."""
+        message = f"User '{username}' has logged in."
+        try:
+            response = self.sns_client.publish(
+                TopicArn=self.sns_topic_arn,
+                Message=message,
+                Subject="User Login Notification"
+            )
+            logging.info(f"Notification sent for user '{username}'. Message ID: {response['MessageId']}")
+        except Exception as e:
+            logging.error(f"Error sending notification: {e}")
+
+    def login_user(self, username: str):
+        """Mock user login method with SNS notification."""
+        user = self.get_by_key(username)
+        if user:
+            self.notify_user_login(username)  # Notify on successful login
+            return True
+        return False
 
     def get_db_connection(self):
         """Establish connection to the MySQL database."""
