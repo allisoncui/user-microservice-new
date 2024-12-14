@@ -80,7 +80,6 @@ async def auth_google_callback(request: Request):
         raise HTTPException(status_code=400, detail="OAuth authentication failed")
 
     user_info = token.get('userinfo')
-    print(user_info)
     if not user_info or 'email' not in user_info:
         raise HTTPException(status_code=400, detail="Failed to retrieve user info from Google.")
 
@@ -96,9 +95,6 @@ async def auth_google_callback(request: Request):
         user_id = user_profile_resource.register_user(username)
         if not user_id:
             raise HTTPException(status_code=500, detail="Registration failed")
-
-    # Notify about user login
-    user_profile_resource.notify_user_login(username)
 
     # Create JWT token
     token_data = {"sub": username, "user_id": user_id}
